@@ -24,6 +24,13 @@ class Pwan < Piece
         end
         move
    end
+
+   def capture(origin, board_array, move=[])
+        if board_array[row][column].data.color == "black"
+            move << [row+1, column+1]
+        end
+        
+   end
 end
 
 class Rook < Piece
@@ -38,6 +45,20 @@ class Rook < Piece
             next_location = [pattern[0]+origin[0],pattern[1]+origin[1]]
             while next_location[0].between?(0, 7) && next_location[1].between?(0, 7) && board_array[next_location[0]][next_location[1]].data.nil?
                 move << next_location
+                next_location = [pattern[0]+next_location[0],pattern[1]+next_location[1]]
+            end
+        end
+        move
+    end
+
+    def capturing_move(origin,board_array, color, move=[])
+        @@move_pattern.map do |pattern|
+            next_location = [pattern[0]+origin[0],pattern[1]+origin[1]]
+            while next_location[0].between?(0, 7) && next_location[1].between?(0, 7)
+                if !board_array[next_location[0]][next_location[1]].data.nil? && board_array[next_location[0]][next_location[1]].data.color == color
+                    move << next_location
+                    break
+                end
                 next_location = [pattern[0]+next_location[0],pattern[1]+next_location[1]]
             end
         end

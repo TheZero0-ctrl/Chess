@@ -92,8 +92,12 @@ class Board
         piece.legal_move(origin,board)
     end
 
+    def capturing_move(origin, board, color, piece)
+        piece.capturing_move(origin,board,color)
+    end
+
     def move_piece(origin, distination,board_array)
-        board_array[distination[0]][distination[1]].data = board_array[origin[0]][origin[1]].data
+        put_piece(board_array[origin[0]][origin[1]].data, distination[0],distination[1])
         board_array[origin[0]][origin[1]].data = nil
     end
 end
