@@ -1,12 +1,36 @@
 require_relative "cell"
+require_relative "piece"
 
 class Board
-    attr_accessor :initial_position
+    attr_accessor :board_array
     def initialize()
-        @initial_position = build_board
+        @board_array = build_board
+    end
+    
+    def initial_position
+        # black side
+        @board_array[1].each_with_index{|cell,column| put_piece(pwan("black"),1,column)}
+        put_piece(rook("black"),0,0)
+        put_piece(rook("black"),0,7)
+        put_piece(knight("black"),0,1)
+        put_piece(knight("black"),0,6)
+        put_piece(bishop("black"),0,2)
+        put_piece(bishop("black"),0,5)
+        put_piece(qeen("black"),0,3)
+        put_piece(king("black"),0,4)
+        # white side
+        @board_array[6].each_with_index{|cell,column| put_piece(pwan("white"),6,column)}
+        put_piece(rook("white"),7,0)
+        put_piece(rook("white"),7,7)
+        put_piece(knight("white"),7,1)
+        put_piece(knight("white"),7,6)
+        put_piece(bishop("white"),7,2)
+        put_piece(bishop("white"),7,5)
+        put_piece(qeen("white"),7,3)
+        put_piece(king("white"),7,4)
     end
 
-    def assign_color_to_cell
+    def build_board
         empty_a = Array.new(8) {Array.new(8){""}}
         empty_a.each_with_index do |row,i|
             row.each_with_index do |item,j|
@@ -32,35 +56,44 @@ class Board
         end
     end
 
-    def build_board
-        assign_color_to_cell[1].each {|cell| cell.data=pwan("black","/u265F")}
+    def put_piece(piece,row,column)
+        @board_array[row][column].data = piece
     end
 
     def cell(color, data=nil)
         Cell.new(color,data)
     end
 
-    def pwan(color, sym)
-        Pwan.new(color,sym)
+    def pwan(color)
+        Pwan.new(color)
     end
 
-    def hook(color, sym)
-        Hook.new(color,sym)
+    def rook(color)
+        Rook.new(color)
     end
 
-    def knight(color, sym)
-        Knight.new(color,sym)
+    def knight(color)
+        Knight.new(color)
     end
 
-    def bishop(color, sym)
-        Bishop.new(color,sym)
+    def bishop(color)
+        Bishop.new(color)
     end
 
-    def qeen(color, sym)
-        Qeen.new(color,sym)
+    def qeen(color)
+        Qeen.new(color)
     end
 
-    def king(color, sym)
-        King.new(color,sym)
+    def king(color)
+        King.new(color)
+    end
+
+    def legal_move(origin, board, piece)
+        piece.legal_move(origin,board)
+    end
+
+    def move_piece(origin, distination,board_array)
+        board_array[distination[0]][distination[1]].data = board_array[origin[0]][origin[1]].data
+        board_array[origin[0]][origin[1]].data = nil
     end
 end
