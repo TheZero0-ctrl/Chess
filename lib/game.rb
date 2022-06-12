@@ -48,10 +48,10 @@ class Game
         }[alphabet]
     end
 
-    def legal_selection() #force player to select piece that can be moved my current player
+    def legal_selection #force player to select piece that can be moved my current player
         location = get_input
         row, column = location
-        until !board_array[row][column].data.nil? && board_array[row][column].data.color == @current_player.color && !board.legal_move([row,column],board_array,board_array[row][column].data).empty?
+        until !board_array[row][column].data.nil? && board_array[row][column].data.color == @current_player.color && (!legal_move(location).empty? || !capturing_move(location).empty?)
             puts "You cannot move this square"
             puts "select another square"
             location = get_input
@@ -60,9 +60,9 @@ class Game
         location
     end
 
-    def legal_distination(legal_move)
+    def legal_distination(legal_move,capturing_move)
         location=get_input
-        until legal_move.include?(location)
+        until legal_move.include?(location) || capturing_move.include?(location)
             puts "you cannot move to this square"
             puts "select another square"
             location = get_input
@@ -80,9 +80,21 @@ class Game
         @board.board_array
     end
 
+    def mark_cell_to_move_and_capture(location,locations)
+        make_cell_active(location)
+        make_cell_capturing(locations)
+    end
+
     def make_cell_active(location)
         row,column = location
         board_array[row][column].active = true
+    end
+
+    def make_cell_capturing(locations)
+        locations.each do |location|
+            row,column = location
+            board_array[row][column].capture = true
+        end
     end
 
     def switch_trun
@@ -94,15 +106,26 @@ class Game
         puts "#{current_player.name}, Select the square to move"
         origin = legal_selection
         row,column = origin
-        make_cell_active(origin)
-        legal_move = @board.legal_move([row,column],board_array,board_array[row][column].data)
+        mark_cell_to_move_and_capture(origin, capturing_move(origin))
+        legal_move = legal_move(origin)
+        capturing_move = capturing_move(origin)
         show_move(legal_move, board_array)
         display_board(board_array)
         puts "#{current_player.name}, Select square where you want to move"
-        distination = legal_distination(legal_move)
+        distination = legal_distination(legal_move, capturing_move)
         board.move_piece(origin, distination,board_array)
         make_cell_active(origin)
         reset_display(board_array)
         make_cell_active(distination)
+    end
+
+    def legal_move(origin)
+        row, column = origin
+        board.legal_move(origin, board_array, board_array[row][column].data)
+    end
+
+    def capturing_move(origin)
+        row,column = origin
+        board.capturing_move(origin, board_array, other_player.color, board_array[row][column].data)
     end
 end

@@ -25,11 +25,16 @@ class Pwan < Piece
         move
    end
 
-   def capture(origin, board_array, move=[])
+   def capturing_move(origin, board_array, color, move=[])
+        row,column = origin
         if board_array[row][column].data.color == "black"
-            move << [row+1, column+1]
+            move << [row+1, column+1] if row+1 != 8 && column+1 != 8 && !board_array[row+1][column+1].data.nil? && board_array[row+1][column+1].data.color == color
+            move << [row+1, column-1] if row+1 !=8 && column-1 != -1 && !board_array[row+1][column-1].data.nil? && board_array[row+1][column-1].data.color == color
+        else
+            move << [row-1, column+1] if row-1 != -1 && column+1 != 8 && !board_array[row-1][column+1].data.nil? && board_array[row-1][column+1].data.color == color
+            move << [row-1, column-1] if row-1 != -1 && column-1 != -1 && !board_array[row-1][column-1].data.nil? && board_array[row-1][column-1].data.color == color
         end
-        
+        move
    end
 end
 

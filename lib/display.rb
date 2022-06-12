@@ -15,8 +15,10 @@ module Display
     end
 
     def background(cell)
-        if cell.active == true
-          106
+        if cell.capture == true
+            101
+        elsif cell.active == true
+            106
         else
             cell.color == "black" ? 100 : 47  
         end
@@ -56,10 +58,12 @@ module Display
     def show_move(moves,board)
         moves.each {|move| board[move[0]][move[1]].data = "\u25CF"}
     end
+
     
     def reset_display(board)
         board.each do |row|
             row.each do |cell|
+                cell.capture = false if cell.capture == true
                cell.active = false if cell.active == true
                cell.data = nil if cell.data == "\u25CF"
             end

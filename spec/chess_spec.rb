@@ -151,3 +151,20 @@ describe Rook do
         end
     end
 end
+
+describe Pwan do |variable|
+    let(:pwan) {Pwan.new("white")}
+    let(:game) {Game.new}
+    it " black pwan returns the location it can capture" do
+        game.board.put_piece(game.board.pwan("white"),3,5)
+        game.board.put_piece(game.board.pwan("white"),3,3)
+        game.board.put_piece(game.board.pwan("black"),2,4)
+        expect(pwan.capturing_move([2,4], game.board_array, "white")).to eq([[3,5],[3,3]])
+    end
+    it "ignore the same color" do
+        game.board.put_piece(game.board.pwan("black"),1,5)
+        game.board.put_piece(game.board.pwan("white"),1,3)
+        game.board.put_piece(game.board.pwan("white"),2,4)
+        expect(pwan.capturing_move([2,4], game.board_array, "black")).to eq([[1,5]])
+    end
+end
