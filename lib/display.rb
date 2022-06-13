@@ -1,6 +1,6 @@
 module Display
     def display_board(board)
-        # system "clear"
+        system "clear"
         board.each_with_index do |row, i|
             print "\e[36m #{(i-8).abs} \e[0m"
             row.each {|cell| print display_cell(cell,cell.data)}

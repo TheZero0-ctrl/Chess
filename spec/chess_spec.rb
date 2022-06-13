@@ -114,6 +114,15 @@ describe Board do
                 board.put_piece(board.bishop("white"),5,5)
                 expect(board.check?([1,4],board.board_array,"white")).to eq(false)
             end
+
+            it "return true" do
+                board.initial_position
+                board.move_piece([6,3],[4,3],board.board_array)
+                board.move_piece([1,3],[3,3],board.board_array)
+                board.move_piece([7,4],[6,3],board.board_array)
+                board.move_piece([0,2],[3,5],board.board_array)
+                expect(board.check?([5,3],board.board_array,"black")).to eq(true)
+            end
         end
         context "for the pwan" do
             it "returns true where there is check" do
@@ -144,13 +153,25 @@ describe Game do
 
     describe "#legal_move" do
         context "for the king" do
-            it "ignore the square where it can me chacked" do
+            it "ignore the square where it can me checked" do
                 game.board.put_piece(game.board.bishop("black"),3,5)
                 game.board.put_piece(game.board.king("white"),6,3)
                 expect(game.legal_move([6,3])).to eq([
                     [6,4],[7,3],[7,4],[7,2],[5,4],[5,2]
                 ])
             end
+
+            it "return legal move" do
+                game.board.initial_position
+                game.board.move_piece([6,3],[4,3],game.board_array)
+                game.board.move_piece([1,3],[3,3],game.board_array)
+                game.board.move_piece([7,4],[6,3],game.board_array)
+                game.board.move_piece([0,2],[3,5],game.board_array)
+                expect(game.legal_move([6,3])).to eq([
+                    [7,4],[5,4],[5,2]
+                ])
+            end
+            
 
         end
     end

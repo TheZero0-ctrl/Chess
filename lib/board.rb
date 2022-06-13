@@ -92,6 +92,10 @@ class Board
         piece.legal_move(origin,board)
     end
 
+    def king_legal_move(origin,board,color,piece)
+        piece.legal_move(origin,board).filter{|move| !check?(move,board,color)}
+    end
+
     def capturing_move(origin, board, color, piece)
         piece.capturing_move(origin,board,color)
     end
@@ -114,17 +118,12 @@ class Board
                     move << [row-1, column-1] if row-1 != -1 && column-1 != -1
                 end
             else
-                move << legal_move(position,board,piece)
+                legal_move(position,board,piece).map {|moves| move << moves}
             end
         end
-        move[0].uniq
+        move.uniq
     end
 
-    def get_capturing_move_of_all_pieces(board, current_color, color,move=[])
-        pieces_on_board(board,color).each do |piece,position|
-            
-        end
-    end
 
     def pieces_on_board(board_array,color)
         pieces = {}
@@ -145,4 +144,26 @@ class Board
             return false
         end
     end
+
+    def prevent_check(board_array,c_color,o_color,king_position,movable_piece={},movable_loc=[])
+       pieces = pieces_on_board(board_array,c_color) 
+    end
+
+    def moveable_piece(pieces, move_piece={},movable_loc=[]) 
+        pieces.each do |piece,location|
+            legal_move = legal_move(location,board_array,piece)
+            if !legal_move.empty?
+                legal_move.each do |move|
+                    move_piece(location,move)
+                    if !check?(king_position, board, o_color)
+                        movable_loc << move
+                        movable_piece[location] = movable_loc
+                        move_piece(move,location) 
+                    end
+                end
+            end
+       end
+       move_piece
+    end
+
 end
