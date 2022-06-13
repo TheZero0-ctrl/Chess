@@ -121,7 +121,7 @@ class Game
 
     def legal_move(origin)
         row, column = origin
-        board.legal_move(origin, board_array, board_array[row][column].data)
+        board.legal_move(origin, board_array, board_array[row][column].data) 
     end
 
     def capturing_move(origin)
