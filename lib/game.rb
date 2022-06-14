@@ -28,11 +28,20 @@ class Game
 
     def get_input
         location = gets.chomp.split("")
-        until location.length == 2 && location[0].downcase.between?("a","h") && location[1].to_i.between?(1,8)
-            puts "invalid selection select again"
-            location = gets.chomp("")
+        if location.length == 1 && ["l","r"].include?(location[0].downcase)
+            if check_for_castaling?(location[0])
+                location[0]
+            else
+                puts "you cannot do this castle"
+                get_input
+            end
+        else   
+            until location.length == 2 && location[0].downcase.between?("a","h") && location[1].to_i.between?(1,8)
+                puts "invalid selection select again"
+                location = gets.chomp("")
+            end
+            valid_row_column(location[1], location[0])
         end
-        valid_row_column(location[1], location[0])
     end
 
     def alphabet_to_column(alphabet)
@@ -49,28 +58,30 @@ class Game
     end
 
     def legal_selection #force player to select piece that can be moved my current player
-        if check?
-            location = get_input
-            row, column = location
-            until !board_array[row][column].data.nil? && board_array[row][column].data.color == @current_player.color && !selection_condition_when_check.empty? && selection_condition_when_check.include?(location)
-                puts "You cannot move this square"
-                puts "select another square"
-                location = get_input
-                row, column = location
-            end
+        location = get_input
+        if ["l","r"].include?(location)
             location
         else
-            location = get_input
-            row, column = location
-            until !board_array[row][column].data.nil? && board_array[row][column].data.color == @current_player.color && (!legal_move(location).empty? || !capturing_move(location).empty?)
-                puts "You cannot move this square"
-                puts "select another square"
-                location = get_input
+            if check?
                 row, column = location
+                until !board_array[row][column].data.nil? && board_array[row][column].data.color == @current_player.color && !selection_condition_when_check.empty? && selection_condition_when_check.include?(location)
+                    puts "You cannot move this square"
+                    puts "select another square"
+                    location = get_input
+                    row, column = location
+                end
+                location
+            else
+                row, column = location
+                until !board_array[row][column].data.nil? && board_array[row][column].data.color == @current_player.color && (!legal_move(location).empty? || !capturing_move(location).empty?)
+                    puts "You cannot move this square"
+                    puts "select another square"
+                    location = get_input
+                    row, column = location
+                end
+                location
             end
-            location
         end
-        
     end
 
     def legal_distination(legal_move,capturing_move,origin)
@@ -137,19 +148,26 @@ class Game
             end
             puts "#{current_player.name}, Select the square to move"
             origin = legal_selection
-            row,column = origin
-            mark_cell_to_move_and_capture(origin, capturing_move(origin))
-            legal_move = legal_move(origin)
-            capturing_move = capturing_move(origin)
-            show_move(legal_move, board_array)
-            display_board(board_array)
-            puts "#{current_player.name}, Select square where you want to move"
-            distination = legal_distination(legal_move, capturing_move, origin)
-            board.move_piece(origin, distination,board_array)
-            prompte_pwan(distination)
-            make_cell_active(origin)
-            reset_display(board_array)
-            make_cell_active(distination)
+            if ["r","l"].include?(origin)
+                castle(origin,current_player.color)
+                display_board(board_array)
+            else
+                row,column = origin
+                make_left_castle_false(current_player.color,origin)
+                make_right_castle_false(current_player.color,origin)
+                mark_cell_to_move_and_capture(origin, capturing_move(origin))
+                legal_move = legal_move(origin)
+                capturing_move = capturing_move(origin)
+                show_move(legal_move, board_array)
+                display_board(board_array)
+                puts "#{current_player.name}, Select square where you want to move"
+                distination = legal_distination(legal_move, capturing_move, origin)
+                board.move_piece(origin, distination,board_array)
+                prompte_pwan(distination)
+                make_cell_active(origin)
+                reset_display(board_array)
+                make_cell_active(distination)
+            end
         end
     end
 
@@ -279,9 +297,70 @@ class Game
             reset_display(board_array)
             @current_player = player2
             @other_player = player1
+            reset_castle_status
             @play_game = true
         else
             @play_game = false
         end
+    end
+
+    def check_for_castaling?(castle_type)
+        board.check_for_castaling?(king(current_player.color),castle_type,board_array,other_player.color,current_player.color)
+    end
+
+    def king(color)
+        row,column =find_king(color)
+        board_array[row][column].data
+    end
+
+    def castle(castle_type,c_color)
+        if castle_type == "l"
+            c_color == "black"? left_black_castle : left_white_castle
+        elsif castle_type == "r"
+            c_color == "black"? right_black_castle : rigth_white_castle
+        end
+    end
+
+    def left_black_castle
+        board.move_piece([0,0],[0,3],board_array)
+        board.move_piece([0,4],[0,2],board_array)
+    end
+
+    def left_white_castle
+        board.move_piece([7,0],[7,3],board_array)
+        board.move_piece([7,4],[7,2],board_array)
+    end
+
+    def rigth_white_castle
+        board.move_piece([7,7],[7,5],board_array)
+        board.move_piece([7,4],[7,6],board_array)
+    end
+
+    def right_black_castle
+        board.move_piece([0,7],[0,5],board_array)
+        board.move_piece([0,4],[0,6],board_array)
+    end
+
+    def make_left_castle_false(color,origin)
+        if color == "white" && (origin == [7,4] || origin == [7,0])
+            king(color).l_castle = false
+        elsif color == "black" && (origin == [0,4] || origin == [0,0])
+            king(color).l_castle = false
+        end
+    end
+
+    def make_right_castle_false(color,origin)
+        if color == "white" && (origin == [7,4] || origin == [7,7])
+            king(color).r_castle = false
+        elsif color == "black" && (origin == [0,4] || origin == [0,7])
+            king(color).r_castle = false
+        end
+    end
+
+    def reset_castle_status
+        king("black").r_castle = true
+        king("black").l_castle = true
+        king("white").r_castle = true
+        king("white").l_castle = true
     end
 end

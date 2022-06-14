@@ -224,4 +224,52 @@ class Board
         to_move_piece
     end
 
+    def check_for_castaling?(king,castle_type,board_array,o_color,c_color)
+        if castle_type == "l" && king.l_castle == true
+            if king.color == "black"
+                if board_array[0][1].data.nil? && board_array[0][2].data.nil? && board_array[0][3].data.nil?
+                    if !check?([0,2],board_array,o_color,c_color)
+                        true
+                    else
+                        false
+                    end
+                else
+                    false
+                end
+            else
+                if board_array[7][1].data.nil? && board_array[7][2].data.nil? && board_array[7][3].data.nil?
+                    if !check?([7,2],board_array,o_color,c_color)
+                        true
+                    else
+                        false
+                    end
+                else
+                    false
+                end
+            end
+        elsif castle_type == "r" && king.r_castle == true
+            if king.color == "black"
+                if board_array[0][6].data.nil? && board_array[0][5].data.nil?
+                    if !check?([0,6],board_array,o_color,c_color)
+                        true
+                    else
+                        false
+                    end
+                else
+                    false
+                end
+            else
+                if board_array[7][6].data.nil? && board_array[7][5].data.nil?
+                    if !check?([7,6],board_array,o_color,c_color)
+                        true
+                    else
+                        false
+                    end
+                else
+                    false
+                end
+            end
+        end
+    end
+
 end

@@ -167,9 +167,12 @@ end
 
 class King < Piece
     @@move_pattern = [[0, 1], [0, -1], [-1, 0], [1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]]
+    attr_accessor :l_castle, :r_castle
     def initialize(color)
         super(color)
         @sym = " \u265A "
+        @l_castle = true
+        @r_castle = true
     end
     
     def legal_move(origin,board_array,move=[])
