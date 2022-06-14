@@ -52,6 +52,7 @@ module Display
         puts
         puts "to play first enter the position of chess to move in formate of A1 A2"
         puts "then enter the position where you want to move"
+        puts "press Q to load game and press S to save game"
         puts "you can enter L to left castle and R to do right castle"
         puts "press y to start game"
     end

@@ -87,7 +87,7 @@ class Game
     def legal_distination(legal_move,capturing_move,origin)
         if check?
             location=get_input
-            until target_when_check(origin)[0].include?(location) || legal_move.include?(location) || capturing_move.include?(location)
+            until legal_move.include?(location) || capturing_move.include?(location)
                 puts "you cannot move to this square"
                 puts "select another square"
                 location = get_input
@@ -147,6 +147,7 @@ class Game
                 puts "you got check"
             end
             puts "#{current_player.name}, Select the square to move"
+            
             origin = legal_selection
             if ["r","l"].include?(origin)
                 castle(origin,current_player.color)
@@ -163,7 +164,7 @@ class Game
                 puts "#{current_player.name}, Select square where you want to move"
                 distination = legal_distination(legal_move, capturing_move, origin)
                 board.move_piece(origin, distination,board_array)
-                prompte_pwan(distination)
+                prompte_pwan(distination) if board_array[distination[0]][distination[1]].data.class == Pwan
                 make_cell_active(origin)
                 reset_display(board_array)
                 make_cell_active(distination)
