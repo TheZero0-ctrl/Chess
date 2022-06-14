@@ -89,6 +89,23 @@ describe Board do
         end
     end
 
+    describe "#king_legal_move" do
+        it "returns the onely one move king can make" do
+            board.initial_position
+            board.move_piece([6,6],[4,6],board.board_array)
+            board.move_piece([1,4],[3,4],board.board_array)
+            board.move_piece([6,2],[5,2],board.board_array)
+            board.move_piece([1,1],[2,1],board.board_array)
+            board.move_piece([7,3],[6,2],board.board_array)
+            board.move_piece([1,7],[2,7],board.board_array)
+            board.move_piece([6,5],[5,5],board.board_array)
+            board.move_piece([0,3],[4,7],board.board_array)
+            expect(board.king_legal_move([7,4],board.board_array,"black","white",board.board_array[7][4].data)).to eq([
+                [7,3]
+            ])
+        end
+    end
+
     describe "#move_piece" do
         it "move rook from [0,0] to [5,0] and data on [0,0] became nil" do
             board.put_piece(board.rook("black"),0,0)
@@ -107,12 +124,12 @@ describe Board do
         context "for the piece other than pwan" do
             it "returns true where there is check" do
                 board.put_piece(board.bishop("white"),2,5)
-                expect(board.check?([1,4],board.board_array,"white")).to eq(true)
+                expect(board.check?([1,4],board.board_array,"white","black")).to eq(true)
             end
             it "return false where there is not check" do
                 board.put_piece(board.bishop("black"),2,5)
                 board.put_piece(board.bishop("white"),5,5)
-                expect(board.check?([1,4],board.board_array,"white")).to eq(false)
+                expect(board.check?([1,4],board.board_array,"white","black")).to eq(false)
             end
 
             it "return true" do
@@ -121,19 +138,106 @@ describe Board do
                 board.move_piece([1,3],[3,3],board.board_array)
                 board.move_piece([7,4],[6,3],board.board_array)
                 board.move_piece([0,2],[3,5],board.board_array)
-                expect(board.check?([5,3],board.board_array,"black")).to eq(true)
+                expect(board.check?([5,3],board.board_array,"black","white")).to eq(true)
+            end
+
+            it "return true" do
+                board.initial_position
+                board.move_piece([6,3],[4,3],board.board_array)
+                board.move_piece([1,4],[2,4],board.board_array)
+                board.move_piece([6,0],[5,0],board.board_array)
+                board.move_piece([0,5],[4,1],board.board_array)
+                expect(board.check?([6,3],board.board_array,"black","white")).to eq(true)
             end
         end
         context "for the pwan" do
             it "returns true where there is check" do
                 board.put_piece(board.bishop("white"),2,5)
-                expect(board.check?([1,4],board.board_array,"white")).to eq(true)
+                expect(board.check?([1,4],board.board_array,"white","black")).to eq(true)
             end
             it "returns false where there is no check" do
                 board.put_piece(board.bishop("black"),2,5)
                 board.put_piece(board.bishop("white"),3,5)
-                expect(board.check?([1,4],board.board_array,"white")).to eq(false)
+                expect(board.check?([1,4],board.board_array,"white","black")).to eq(false)
             end
+        end
+    end
+
+    # describe "#get_legal_move_of_all_pieces" do
+    #     it "returns legal_move of all pieces" do
+    #         board.initial_position
+    #         board.move_piece([6,3],[4,3],board.board_array)
+    #         board.move_piece([1,4],[2,4],board.board_array)
+    #         board.move_piece([6,0],[5,0],board.board_array)
+    #         board.move_piece([0,5],[4,1],board.board_array)
+    #         expect(board.get_legal_move_of_all_pieces(board.board_array,"black")).to eq([
+
+    #         ])
+    #     end
+    # end
+
+    describe "#get_capture_move" do
+        it "return capture move of all pieces" do
+            board.initial_position
+            board.move_piece([6,3],[4,3],board.board_array)
+            board.move_piece([1,4],[2,4],board.board_array)
+            board.move_piece([6,0],[5,0],board.board_array)
+            board.move_piece([0,5],[4,1],board.board_array)
+            expect(board.get_capture_move(board.board_array,"black","white")).to eq([
+                [7,4],[5,0]
+            ])
+        end
+    end
+
+    describe "#movable_piece" do
+        it "returns the hash of piece which can be moved to prevent check" do
+            board.initial_position
+            board.move_piece([6,3],[4,3],board.board_array)
+            board.move_piece([1,4],[2,4],board.board_array)
+            board.move_piece([6,0],[5,0],board.board_array)
+            board.move_piece([0,5],[4,1],board.board_array)
+            expect(board.moveable_piece([7,4], "black","white")).to eq({
+                [6, 2]=>[[5, 2]], [7, 1]=>[[6, 3], [5, 2]], [7, 2]=>[[6, 3]], [7, 3]=>[[6, 3]]
+            })
+        end
+        it "is the case where only king can move to prevent check" do
+            board.initial_position
+            board.move_piece([6,6],[4,6],board.board_array)
+            board.move_piece([1,4],[3,4],board.board_array)
+            board.move_piece([6,2],[5,2],board.board_array)
+            board.move_piece([1,1],[2,1],board.board_array)
+            board.move_piece([7,3],[6,2],board.board_array)
+            board.move_piece([1,7],[2,7],board.board_array)
+            board.move_piece([6,5],[5,5],board.board_array)
+            board.move_piece([0,3],[4,7],board.board_array)
+            expect(board.moveable_piece([7,4], "black","white")).to eq({
+                [7, 4]=>[[7, 3]]
+            })
+        end
+
+        it "returns the empty hash when checkmate" do
+            board.initial_position
+            board.move_piece([6,5],[4,5], board.board_array)
+            board.move_piece([1,4],[2,4], board.board_array)
+            board.move_piece([6,6],[4,6], board.board_array)
+            board.move_piece([0,3],[4,7], board.board_array)
+            expect(board.moveable_piece([7,4],"black","white")).to eq({
+
+            })
+        end
+
+    end
+
+    describe "#able_to_capture" do
+        it "returns the hash which can capture piece to prevent check" do
+            board.initial_position
+            board.move_piece([6,6],[4,6],board.board_array)
+            board.move_piece([1,4],[2,4],board.board_array)
+            board.move_piece([6,0],[5,0],board.board_array)
+            board.move_piece([0,5],[4,1],board.board_array)
+            expect(board.able_to_capture([7,4],"black","white")).to eq({
+                [5, 0]=>[[4, 1]]
+            })
         end
     end
 end
@@ -153,7 +257,7 @@ describe Game do
 
     describe "#legal_move" do
         context "for the king" do
-            it "ignore the square where it can me checked" do
+            it "ignore the square where it can be checked" do
                 game.board.put_piece(game.board.bishop("black"),3,5)
                 game.board.put_piece(game.board.king("white"),6,3)
                 expect(game.legal_move([6,3])).to eq([
@@ -192,6 +296,145 @@ describe Game do
 
         end
     end
+
+    describe "#find_king" do
+        it "retuns location of king" do
+            game.board.initial_position
+            expect(game.find_king("white")).to eq([7,4])
+        end
+    end
+
+    describe "#selection_condition_with_check" do
+        it "returns the legal move when check" do
+            game.board.initial_position
+            game.board.move_piece([6,3],[4,3],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([1,4],[2,4],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([6,0],[5,0],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([0,5],[4,1],game.board.board_array)
+            game.switch_trun
+            expect(game.selection_condition_when_check).to eq([
+                [6,2],[7,1],[7,2],[7,3],[5,0]
+            ])
+        end
+
+        it "returns Empty array when checkmate" do
+            game.board.initial_position
+            game.board.move_piece([6,4],[4,4],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([1,0],[2,0],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([7,5],[4,2],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([2,0],[3,0],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([7,3],[5,5],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([3,0],[4,0],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([5,5],[1,5],game.board.board_array)
+            game.switch_trun
+            expect(game.selection_condition_when_check).to eq([
+
+            ])
+        end
+
+        it "returns empty arry when white got checkmate" do
+            game.board.initial_position
+            game.board.move_piece([6,5],[4,5],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([1,4],[2,4],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([6,6],[4,6],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([0,3],[4,7],game.board.board_array)
+            game.switch_trun
+            expect(game.selection_condition_when_check).to eq([
+
+                ])
+        end
+
+        it "returna arry of possible move" do
+            game.board.initial_position
+            game.board.move_piece([6,4],[4,4],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([1,3],[2,3],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([7,5],[4,2],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([2,2],[3,2],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([7,3],[5,5],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([0,3],[2,1],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([5,5],[1,5],game.board.board_array)
+            game.switch_trun
+            expect(game.selection_condition_when_check).to eq([
+                [0,4]
+            ])
+        end
+    end
+
+    describe "#target_when_check" do
+        it "returns array of possible move of king to prevent check" do
+            game.board.initial_position
+            game.board.move_piece([6,4],[4,4],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([1,3],[2,3],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([7,5],[4,2],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([2,2],[3,2],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([7,3],[5,5],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([0,3],[2,1],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([5,5],[1,5],game.board.board_array)
+            game.switch_trun
+            expect(game.target_when_check([0,4])).to eq([
+                [[0, 3], [1, 3]]
+            ])
+        end
+    end
+
+    describe "#check_mate?" do
+        it "return true when black get check_mate" do
+            game.board.initial_position
+            game.board.move_piece([6,4],[4,4],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([1,0],[2,0],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([7,5],[4,2],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([2,0],[3,0],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([7,3],[5,5],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([3,0],[4,0],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([5,5],[1,5],game.board.board_array)
+            game.switch_trun
+            expect(game.check_mate?).to eq(true)
+        end
+
+        it "return true when white get check_mate" do
+            game.board.initial_position
+            game.board.move_piece([6,5],[4,5],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([1,4],[2,4],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([6,6],[4,6],game.board.board_array)
+            game.switch_trun
+            game.board.move_piece([0,3],[4,7],game.board.board_array)
+            game.switch_trun
+            expect(game.check_mate?).to eq(true)
+        end
+    end
+
 end
 
 describe Rook do

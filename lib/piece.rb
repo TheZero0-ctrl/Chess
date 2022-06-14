@@ -30,11 +30,11 @@ class Pwan < Piece
    def capturing_move(origin, board_array, color, move=[])
         row,column = origin
         if board_array[row][column].data.color == "black"
-            move << [row+1, column+1] if row+1 != 8 && column+1 != 8 && !board_array[row+1][column+1].data.nil? && board_array[row+1][column+1].data.color == color
-            move << [row+1, column-1] if row+1 !=8 && column-1 != -1 && !board_array[row+1][column-1].data.nil? && board_array[row+1][column-1].data.color == color
+            move << [row+1, column+1] if row+1 != 8 && column+1 != 8 && !board_array[row+1][column+1].data.nil? && board_array[row+1][column+1].data!= "\u25CF" && board_array[row+1][column+1].data.color == color
+            move << [row+1, column-1] if row+1 !=8 && column-1 != -1 && !board_array[row+1][column-1].data.nil? && board_array[row+1][column-1].data!= "\u25CF" && board_array[row+1][column-1].data.color == color
         else
-            move << [row-1, column+1] if row-1 != -1 && column+1 != 8 && !board_array[row-1][column+1].data.nil? && board_array[row-1][column+1].data.color == color
-            move << [row-1, column-1] if row-1 != -1 && column-1 != -1 && !board_array[row-1][column-1].data.nil? && board_array[row-1][column-1].data.color == color
+            move << [row-1, column+1] if row-1 != -1 && column+1 != 8 && !board_array[row-1][column+1].data.nil? && board_array[row-1][column+1].data!="\u25CF" && board_array[row-1][column+1].data.color == color
+            move << [row-1, column-1] if row-1 != -1 && column-1 != -1 && !board_array[row-1][column-1].data.nil? && board_array[row-1][column-1].data!="\u25CF" && board_array[row-1][column-1].data.color == color
         end
         move
    end
@@ -63,7 +63,7 @@ class Rook < Piece
             next_location = [pattern[0]+origin[0],pattern[1]+origin[1]]
             while next_location[0].between?(0, 7) && next_location[1].between?(0, 7)
                 if !board_array[next_location[0]][next_location[1]].data.nil?
-                    move << next_location if board_array[next_location[0]][next_location[1]].data.color == color
+                    move << next_location if board_array[next_location[0]][next_location[1]].data != "\u25CF" &&board_array[next_location[0]][next_location[1]].data.color == color
                     break
                 end
                 next_location = [pattern[0]+next_location[0],pattern[1]+next_location[1]]
@@ -92,7 +92,7 @@ class Knight < Piece
         @@move_pattern.map do |pattern|
             next_location = [pattern[0]+origin[0],pattern[1]+origin[1]]
             move << next_location if next_location[0].between?(0, 7) && next_location[1].between?(0, 7) &&
-            !board_array[next_location[0]][next_location[1]].data.nil? && board_array[next_location[0]][next_location[1]].data.color == color
+            !board_array[next_location[0]][next_location[1]].data.nil? && board_array[next_location[0]][next_location[1]].data != "\u25CF" && board_array[next_location[0]][next_location[1]].data.color == color
         end
         move
     end
@@ -120,7 +120,7 @@ class Bishop < Piece
             next_location = [pattern[0]+origin[0],pattern[1]+origin[1]]
             while next_location[0].between?(0, 7) && next_location[1].between?(0, 7)
                 if !board_array[next_location[0]][next_location[1]].data.nil?
-                    move << next_location if board_array[next_location[0]][next_location[1]].data.color == color
+                    move << next_location if board_array[next_location[0]][next_location[1]].data != "\u25CF" &&board_array[next_location[0]][next_location[1]].data.color == color
                     break
                 end
                 next_location = [pattern[0]+next_location[0],pattern[1]+next_location[1]]
@@ -155,7 +155,7 @@ class Qeen < Piece
             next_location = [pattern[0]+origin[0],pattern[1]+origin[1]]
             while next_location[0].between?(0, 7) && next_location[1].between?(0, 7)
                 if !board_array[next_location[0]][next_location[1]].data.nil?
-                    move << next_location if board_array[next_location[0]][next_location[1]].data.color == color
+                    move << next_location if board_array[next_location[0]][next_location[1]].data != "\u25CF" &&board_array[next_location[0]][next_location[1]].data.color == color
                     break
                 end
                 next_location = [pattern[0]+next_location[0],pattern[1]+next_location[1]]
@@ -187,6 +187,7 @@ class King < Piece
             next_location = [pattern[0]+origin[0],pattern[1]+origin[1]]
             if next_location[0].between?(0, 7) && next_location[1].between?(0, 7) &&
                 !board_array[next_location[0]][next_location[1]].data.nil? &&
+                board_array[next_location[0]][next_location[1]].data != "\u25CF" &&
                 board_array[next_location[0]][next_location[1]].data.color == color
                 move << next_location
             end

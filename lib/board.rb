@@ -92,8 +92,8 @@ class Board
         piece.legal_move(origin,board)
     end
 
-    def king_legal_move(origin,board,color,piece)
-        piece.legal_move(origin,board).filter{|move| !check?(move,board,color)}
+    def king_legal_move(origin,board,o_color,c_color,piece)
+        piece.legal_move(origin,board).filter{|move| !check?(move,board,o_color,c_color)}
     end
 
     def capturing_move(origin, board, color, piece)
@@ -105,10 +105,10 @@ class Board
         board_array[origin[0]][origin[1]].data = nil
     end
 
-    def get_legal_move_of_all_pieces(board, color,move=[])
-        pieces_on_board(board,color).each do |piece,position|
+    def get_legal_move_of_all_pieces(board, o_color,move=[])
+        pieces_on_board(board,o_color).each do |piece,position|
             if piece.class == Pwan
-                if color == "black"
+                if o_color == "black"
                     row, column = position
                     move << [row+1, column+1] if row+1 != 8 && column+1 != 8
                     move << [row+1, column-1] if row+1 !=8 && column-1 != -1
@@ -123,13 +123,19 @@ class Board
         end
         move.uniq
     end
-
+        
+    def get_capture_move(board,o_color,c_color,move=[])
+        pieces_on_board(board,o_color).each do |piece,position|
+            capturing_move(position,board,c_color,piece).map{|moves|move<<moves}
+        end
+        move.uniq
+    end
 
     def pieces_on_board(board_array,color)
         pieces = {}
         board_array.each_with_index do |row,i|
             row.each_with_index do |column,j|
-                if !column.data.nil? && column.data.color == color
+                if !column.data.nil? && column.data != "\u25CF" && column.data.color == color
                     pieces[column.data] = [i,j]
                 end
             end
@@ -137,33 +143,85 @@ class Board
         pieces
     end
 
-    def check?(king_position, board, color)
-        if get_legal_move_of_all_pieces(board,color).include?(king_position)
-            return true
+    def check?(king_position, board, o_color,c_color)
+        if board[king_position[0]][king_position[1]].data.nil?
+            get_legal_move_of_all_pieces(board,o_color).include?(king_position)? true : false
         else
-            return false
+            get_capture_move(board,o_color,c_color).include?(king_position)? true :false
         end
     end
 
-    def prevent_check(board_array,c_color,o_color,king_position,movable_piece={},movable_loc=[])
-       pieces = pieces_on_board(board_array,c_color) 
-    end
-
-    def moveable_piece(pieces, move_piece={},movable_loc=[]) 
+    def moveable_piece(king_position, o_color, c_color, to_move_piece={},movable_loc=[]) 
+        pieces = pieces_on_board(board_array, c_color)
         pieces.each do |piece,location|
-            legal_move = legal_move(location,board_array,piece)
+            if piece.class == King
+                legal_move = king_legal_move(location,board_array,o_color,c_color,piece)
+            else
+                legal_move = legal_move(location,board_array,piece)
+            end
+
             if !legal_move.empty?
-                legal_move.each do |move|
-                    move_piece(location,move)
-                    if !check?(king_position, board, o_color)
-                        movable_loc << move
-                        movable_piece[location] = movable_loc
-                        move_piece(move,location) 
+                legal_move.each_with_index do |move,i|
+                    if piece.class == King
+                        move_piece(location,move,board_array)
+                        king_position = move
+                    else
+                        move_piece(location,move,board_array)
                     end
+                    if !check?(king_position, board_array, o_color,c_color)
+                        movable_loc << move
+                        to_move_piece[location] = movable_loc
+                    end
+                    if piece.class == King
+                        move_piece(move,location,board_array)
+                        king_position = location
+                        movable_loc = [] if i == legal_move.length-1
+                    else
+                        move_piece(move,location,board_array)
+                        movable_loc = [] if i == legal_move.length-1
+                    end
+                    
+                    
                 end
             end
        end
-       move_piece
+       to_move_piece
+    end
+
+    def able_to_capture(king_position,o_color,c_color,to_move_piece={},movable_loc=[])
+        pieces = pieces_on_board(board_array, c_color)
+        pieces.each do |piece,location|
+            capturing_move = capturing_move(location,board_array,o_color,piece)
+            if !capturing_move.empty?
+                capturing_move.each_with_index do |move,i|
+                    if piece.class == King
+                        piece_at_dist = board_array[move[0]][move[1]].data
+                        move_piece(location,move,board_array)
+                        king_position = move
+                    else
+                        piece_at_dist = board_array[move[0]][move[1]].data
+                        move_piece(location,move,board_array)
+                    end
+                    if !check?(king_position,board_array,o_color,c_color)
+                        movable_loc << move
+                        to_move_piece[location] = movable_loc
+                    end
+                    if piece.class == King
+                        move_piece(move,location,board_array)
+                        board_array[move[0]][move[1]].data = piece_at_dist
+                        movable_loc = [] if i == capturing_move.length-1
+                        king_position = location
+                    else
+                        move_piece(move,location,board_array)
+                        board_array[move[0]][move[1]].data = piece_at_dist
+                        movable_loc = [] if i == capturing_move.length-1
+                    end
+                    
+                end
+            end
+                    
+        end
+        to_move_piece
     end
 
 end
