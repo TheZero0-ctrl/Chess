@@ -173,13 +173,7 @@ class Game
     end
 
     def legal_move(origin)
-        row, column = origin
-        if board_array[row][column].data.class == King
-            board.king_legal_move(origin,board_array,other_player.color,current_player.color,board_array[row][column].data)
-        else
-            filter_legal_move(origin)
-        end
-        
+        filter_legal_move(origin)
     end
 
     def capturing_move(origin,c_move=[])

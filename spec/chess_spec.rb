@@ -88,24 +88,7 @@ describe Board do
             ])
         end
     end
-
-    describe "#king_legal_move" do
-        it "returns the onely one move king can make" do
-            board.initial_position
-            board.move_piece([6,6],[4,6],board.board_array)
-            board.move_piece([1,4],[3,4],board.board_array)
-            board.move_piece([6,2],[5,2],board.board_array)
-            board.move_piece([1,1],[2,1],board.board_array)
-            board.move_piece([7,3],[6,2],board.board_array)
-            board.move_piece([1,7],[2,7],board.board_array)
-            board.move_piece([6,5],[5,5],board.board_array)
-            board.move_piece([0,3],[4,7],board.board_array)
-            expect(board.king_legal_move([7,4],board.board_array,"black","white",board.board_array[7][4].data)).to eq([
-                [7,3]
-            ])
-        end
-    end
-
+    
     describe "#move_piece" do
         it "move rook from [0,0] to [5,0] and data on [0,0] became nil" do
             board.put_piece(board.rook("black"),0,0)
@@ -162,19 +145,6 @@ describe Board do
             end
         end
     end
-
-    # describe "#get_legal_move_of_all_pieces" do
-    #     it "returns legal_move of all pieces" do
-    #         board.initial_position
-    #         board.move_piece([6,3],[4,3],board.board_array)
-    #         board.move_piece([1,4],[2,4],board.board_array)
-    #         board.move_piece([6,0],[5,0],board.board_array)
-    #         board.move_piece([0,5],[4,1],board.board_array)
-    #         expect(board.get_legal_move_of_all_pieces(board.board_array,"black")).to eq([
-
-    #         ])
-    #     end
-    # end
 
     describe "#get_capture_move" do
         it "return capture move of all pieces" do

@@ -92,9 +92,6 @@ class Board
         piece.legal_move(origin,board)
     end
 
-    def king_legal_move(origin,board,o_color,c_color,piece)
-        piece.legal_move(origin,board).filter{|move| !check?(move,board,o_color,c_color)}
-    end
 
     def capturing_move(origin, board, color, piece)
         piece.capturing_move(origin,board,color)
@@ -108,20 +105,18 @@ class Board
     def get_legal_move_of_all_pieces(board, o_color,move=[])
         pieces_on_board(board,o_color).each do |piece,position|
             if piece.class == Pwan
-                if o_color == "black"
-                    row, column = position
-                    move << [row+1, column+1] if row+1 != 8 && column+1 != 8
-                    move << [row+1, column-1] if row+1 !=8 && column-1 != -1
-                else
-                    row, column = position
-                    move << [row-1, column+1] if row-1 != -1 && column+1 != 8
-                    move << [row-1, column-1] if row-1 != -1 && column-1 != -1
-                end
+                row, column = position
+                move << [pattern_of_pwan(row,o_color), column+1] if pattern_of_pwan(row,o_color) != 8 && column+1 != 8
+                move << [pattern_of_pwan(row,o_color), column-1] if pattern_of_pwan(row,o_color) !=8 && column-1 != -1
             else
                 legal_move(position,board,piece).map {|moves| move << moves}
             end
         end
         move.uniq
+    end
+
+    def pattern_of_pwan(row, color)
+        color == "black"? row + 1 : row - 1
     end
         
     def get_capture_move(board,o_color,c_color,move=[])
@@ -154,12 +149,7 @@ class Board
     def moveable_piece(king_position, o_color, c_color, to_move_piece={},movable_loc=[]) 
         pieces = pieces_on_board(board_array, c_color)
         pieces.each do |piece,location|
-            if piece.class == King
-                legal_move = king_legal_move(location,board_array,o_color,c_color,piece)
-            else
-                legal_move = legal_move(location,board_array,piece)
-            end
-
+            legal_move = legal_move(location,board_array,piece)
             if !legal_move.empty?
                 legal_move.each_with_index do |move,i|
                     if piece.class == King
@@ -180,7 +170,6 @@ class Board
                         move_piece(move,location,board_array)
                         movable_loc = [] if i == legal_move.length-1
                     end
-                    
                     
                 end
             end
@@ -225,51 +214,20 @@ class Board
     end
 
     def check_for_castaling?(king,castle_type,board_array,o_color,c_color)
-        if castle_type == "l" && king.l_castle == true
-            if king.color == "black"
-                if board_array[0][1].data.nil? && board_array[0][2].data.nil? && board_array[0][3].data.nil?
-                    if !check?([0,2],board_array,o_color,c_color)
-                        true
-                    else
-                        false
-                    end
-                else
-                    false
-                end
+        if king.l_castle == true
+            if castling_side(castle_type).all? {|column|board_array[king_row(king.color)][column].data.nil?}
+                !check?([king_row(king.color),2],board_array,o_color,c_color) ? true : false
             else
-                if board_array[7][1].data.nil? && board_array[7][2].data.nil? && board_array[7][3].data.nil?
-                    if !check?([7,2],board_array,o_color,c_color)
-                        true
-                    else
-                        false
-                    end
-                else
-                    false
-                end
-            end
-        elsif castle_type == "r" && king.r_castle == true
-            if king.color == "black"
-                if board_array[0][6].data.nil? && board_array[0][5].data.nil?
-                    if !check?([0,6],board_array,o_color,c_color)
-                        true
-                    else
-                        false
-                    end
-                else
-                    false
-                end
-            else
-                if board_array[7][6].data.nil? && board_array[7][5].data.nil?
-                    if !check?([7,6],board_array,o_color,c_color)
-                        true
-                    else
-                        false
-                    end
-                else
-                    false
-                end
+                false
             end
         end
     end
 
+    def king_row(color)
+        color == black ? 0 : 7
+    end
+
+    def castling_side(side)
+        side == "l" ? [1,2,3] : [6,5]
+    end
 end
