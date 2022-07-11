@@ -6,7 +6,12 @@ class Piece
         @color = color
         @sym = nil
     end
+
+    def data(row,column,array)
+        array[row][column].data
+    end
 end
+
 
 class Pwan < Piece
    def initialize(color)
@@ -16,29 +21,53 @@ class Pwan < Piece
 
    def legal_move(origin,board_array, move=[])
         row,column = origin
-        if board_array[row][column].data.color == "black"
-            move << [row+1,column] if row+1 != 8 && board_array[row+1][column].data.nil?
-            move << [row+2,column] if row == 1 && board_array[row+2][column].data.nil?
-        else
-            move << [row-1,column] if row-1 != -1 && board_array[row-1][column].data.nil?
-            move << [row-2,column] if row == 6 && board_array[row-2][column].data.nil?
-
-        end
+        color = data(row,column,board_array).color
+        move << [pattern_of_pwan(row,color),column] if row+1 != boundary(color) && board_array[pattern_of_pwan(row,color)][column].data.nil?
+        move << [double_move_of_pwan(row, color),column] if row == initial_pwan_position(color) && board_array[double_move_of_pwan(row,color)][column].data.nil?
         move
    end
 
-   def capturing_move(origin, board_array, color, move=[])
+   def capturing_move(origin, board_array, o_color, move=[])
         row,column = origin
-        if board_array[row][column].data.color == "black"
-            move << [row+1, column+1] if row+1 != 8 && column+1 != 8 && !board_array[row+1][column+1].data.nil? && board_array[row+1][column+1].data!= "\u25CF" && board_array[row+1][column+1].data.color == color
-            move << [row+1, column-1] if row+1 !=8 && column-1 != -1 && !board_array[row+1][column-1].data.nil? && board_array[row+1][column-1].data!= "\u25CF" && board_array[row+1][column-1].data.color == color
-        else
-            move << [row-1, column+1] if row-1 != -1 && column+1 != 8 && !board_array[row-1][column+1].data.nil? && board_array[row-1][column+1].data!="\u25CF" && board_array[row-1][column+1].data.color == color
-            move << [row-1, column-1] if row-1 != -1 && column-1 != -1 && !board_array[row-1][column-1].data.nil? && board_array[row-1][column-1].data!="\u25CF" && board_array[row-1][column-1].data.color == color
-        end
+        color = data(row,column,board_array).color
+        move << [pattern_of_pwan(row,color), column+1] if pattern_of_pwan(row,color) != boundary(color) && 
+        column+1 != 8 && !r_possible_move(row,column,board_array,color).nil? && 
+        r_possible_move(row,column,board_array,color)!= "\u25CF" && 
+        r_possible_move(row,column,board_array,color).color == o_color
+
+        move << [pattern_of_pwan(row,color), column-1] if pattern_of_pwan(row,color) != boundary(color) && 
+        column-1 != -1 && !l_possible_move(row,column,board_array,color).nil? && 
+        l_possible_move(row,column,board_array,color)!= "\u25CF" && 
+        l_possible_move(row,column,board_array,color).color == o_color
         move
    end
+
+    def pattern_of_pwan(row, color)
+        color == "black"? row + 1 : row - 1
+    end
+
+    def double_move_of_pwan(row,color)
+        color == "black"? row + 2 : row -2
+    end
+
+    def initial_pwan_position(color)
+        color == "black"? 1 : 6
+    end
+
+    def boundary(color)
+        color == "black"? 8 : -1
+    end
+
+    def r_possible_move(row,column,array,color)
+        color == "black"? data(pattern_of_pwan(row,color),column+1, array) : data(pattern_of_pwan(row,color),column+1, array)
+    end
+
+    def l_possible_move(row,column,array,color)
+        color == "black"? data(pattern_of_pwan(row,color),column-1, array) : data(pattern_of_pwan(row,color),column-1, array)
+    end   
+
 end
+
 
 class Rook < Piece
     @@move_pattern = [[0, 1], [0, -1], [-1, 0], [1, 0]]

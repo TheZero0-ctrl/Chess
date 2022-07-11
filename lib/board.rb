@@ -42,19 +42,12 @@ class Board
 
     def decide_color_of_cell(row,column)
         if column%2==0
-            if row % 2 == 0
-                cell("white")
-            else
-                cell("black")
-            end
+            row % 2 == 0 ? cell("white") : cell("black")
         else
-            if row % 2 != 0
-                cell("white")
-            else
-                cell("black")
-            end
+            row % 2 != 0 ? cell("white") : cell("black")
         end
     end
+
 
     def put_piece(piece,row,column)
         @board_array[row][column].data = piece
@@ -106,8 +99,8 @@ class Board
         pieces_on_board(board,o_color).each do |piece,position|
             if piece.class == Pwan
                 row, column = position
-                move << [pattern_of_pwan(row,o_color), column+1] if pattern_of_pwan(row,o_color) != 8 && column+1 != 8
-                move << [pattern_of_pwan(row,o_color), column-1] if pattern_of_pwan(row,o_color) !=8 && column-1 != -1
+                move << [pattern_of_pwan(row,o_color), column+1] if pattern_of_pwan(row,o_color) != boundary(o_color) && column+1 != 8
+                move << [pattern_of_pwan(row,o_color), column-1] if pattern_of_pwan(row,o_color) != boundary(o_color) && column-1 != -1
             else
                 legal_move(position,board,piece).map {|moves| move << moves}
             end
@@ -117,6 +110,10 @@ class Board
 
     def pattern_of_pwan(row, color)
         color == "black"? row + 1 : row - 1
+    end
+
+    def boundary(color)
+        color == "black"? 8 : 1
     end
         
     def get_capture_move(board,o_color,c_color,move=[])
